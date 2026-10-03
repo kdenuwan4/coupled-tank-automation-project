@@ -1,0 +1,18 @@
+# MATLAB / Simulink
+*.asv
+*.autosave
+*.m~
+*.slxc
+
+# MATLAB generated folders/files
+slprj/
+codegen/
+simulink_cache/
+*.mexw64
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# MATLAB preferences
+matlab.prf
