@@ -112,6 +112,33 @@ Notes:
 - Poles: -0.007428 (double), so the open loop is stable and non-oscillatory, with a time constant of about 135 s per tank.
 - Validity: small deviations around h = 0.2 m only. The linear model degrades far from this point (for example near empty, where the sqrt curve is much steeper).
 
+
+### Plant transfer function
+
+`G(s) = 0.3714 / (s + 0.007428)^2`
+
+Two identical first-order lags in series (one per tank, about 135 s each), DC gain 6731 m per (m^3/s). Poles (-0.007428, double) and DC gain were checked against hand calculation. Notably, the plant has no integrator.
+
+### Controller design spec (Tank 2 level)
+
+| Spec | Target |
+|---|---|
+| Steady-state error | 0 |
+| Overshoot | <= 10% |
+| Settling time (2%) | <= 400 s (open loop is about 790 s) |
+| Pump command | within 0 to 10 V (to be checked once pump block is added) |
+
+### Controller design results
+
+| Controller | Overshoot | Settling time | Final value (setpoint = 1) |
+|---|---|---|---|
+| P (K = 2.8e-4) | 10.0% | not meaningful (settles at wrong value) | 0.651 (35% steady-state error) |
+| PI (Kp = <your value>, Ki = Kp*0.005) | 6.0% | 636 s | 1.000 |
+
+Findings:
+- On the root locus the double plant pole splits vertically, so the real part stays at -0.0074 whatever the gain. P control therefore cannot be faster than the plant (about 540 s) and, with no integrator in the plant, always leaves steady-state error.
+- PI removes the steady-state error but is still limited to roughly open-loop speed. The 400 s spec needs derivative action, which is the next step.
+
 ### Model assumptions
 
 - The plant input is **flow** (m^3/s), not pump voltage. Pump gain and saturation are not yet in the Simulink model; they will be added before the PLC phase.
@@ -120,9 +147,9 @@ Notes:
 - No physical level limits (overflow / empty) enforced in the integrators yet.
 
 ### Next steps
-
-- [ ] Verify poles and DC gain of `sys_lin` against hand calculation
-- [ ] Define the closed-loop spec (settling time, overshoot, steady-state error)
+- [x] Verify poles and DC gain of `sys_lin` against hand calculation
+- [x] Define the closed-loop spec (settling time, overshoot, steady-state error)
+- [x] P and PI design using root locus
 - [ ] PID design using root locus
 - [ ] Stability margins with `margin()` and link to time-domain behavior
 - [ ] Disturbance test (extra outflow valve opening)
@@ -136,6 +163,7 @@ Notes:
 | Date | Entry |
 |---|---|
 | 2026-10-09 | Built and validated single-tank and two-tank nonlinear Simulink models. Parameterized with `params.m`. Linearized at h2* = 0.2 m. |
+| 2026-10-14 | Verified linearization (poles, DC gain). Set design spec. Designed P (35% steady-state error) and PI (0% error, 6% overshoot, 636 s settling). Speed limited by plant poles; PID next. |
 
 ## How to run
 

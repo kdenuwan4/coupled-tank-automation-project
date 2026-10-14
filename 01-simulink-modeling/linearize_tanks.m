@@ -13,3 +13,4 @@ save('sys_lin.mat', 'sys_lin');          % save it for later steps
 pole(sys_lin)
 dcgain(sys_lin)
 tf(sys_lin)
+
