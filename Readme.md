@@ -26,7 +26,10 @@ two-tank-control-plc-ai/
 │   ├── TankModel.slx
 │   ├── params.m
 │   ├── linearize_tanks.m
-│   └── sys_lin.mat
+│   ├── design_controller.m
+│   ├── stability.m
+│   ├── sys_lin.mat
+│   └── figures/
 ├── 02-plc-tia-portal/
 ├── 03-scada-communication/
 ├── 04-ai-anomaly-detection/
@@ -134,10 +137,28 @@ Two identical first-order lags in series (one per tank, about 135 s each), DC ga
 |---|---|---|---|
 | P (K = 2.8e-4) | 10.0% | not meaningful (settles at wrong value) | 0.651 (35% steady-state error) |
 | PI (Kp = <your value>, Ki = Kp*0.005) | 6.0% | 636 s | 1.000 |
+| PID (K = 0.03, z = 0.007428, N = 0.05) | 0% | 275 s | 1.000 |
 
 Findings:
 - On the root locus the double plant pole splits vertically, so the real part stays at -0.0074 whatever the gain. P control therefore cannot be faster than the plant (about 540 s) and, with no integrator in the plant, always leaves steady-state error.
 - PI removes the steady-state error but is still limited to roughly open-loop speed. The 400 s spec needs derivative action, which is the next step.
+- PID places two zeros on the plant's double pole, leaving closed-loop poles at -0.0168 and -0.0333 (both real, no overshoot). It meets all three specs, and settling is more than 2x faster than open loop.
+- Equivalent standard-form gains: Kp = 4.13e-4, Ki = 1.66e-6, Kd = 2.17e-2 (Ti about 249 s, Td about 53 s, derivative filter pole at 0.05 rad/s). These are in flow-per-metre units and need rescaling for the PLC.
+- Caveat: a 5 cm setpoint step demands an initial pump flow change of about 7.5e-5 m^3/s, above the roughly 3.1e-5 m^3/s of headroom before saturation. To be tested in the nonlinear model with the pump block.
+- The design relies on pole-zero cancellation at the linearization point, so it may degrade when the real operating point drifts. To be tested in the disturbance test.
+
+### Stability margins (PID, K = 0.03)
+
+Gain margin: infinite. Phase margin: 77.7 deg at 0.0109 rad/s (`stability.m`).
+The large phase margin explains the 0% overshoot. The infinite gain margin is a result of the ideal pump model and will become finite once actuator lag is added.
+
+Gain sweep (raising K shrinks the phase margin and overshoot appears):
+
+| K | Phase margin | Overshoot |
+|---|---|---|
+| 0.03 | <your value> | <your value> |
+| 0.1 | <your value> | <your value> |
+| 1 | <your value> | <your value> |
 
 ### Model assumptions
 
@@ -150,8 +171,8 @@ Findings:
 - [x] Verify poles and DC gain of `sys_lin` against hand calculation
 - [x] Define the closed-loop spec (settling time, overshoot, steady-state error)
 - [x] P and PI design using root locus
-- [ ] PID design using root locus
-- [ ] Stability margins with `margin()` and link to time-domain behavior
+- [x] PID design using root locus
+- [x] Stability margins with `margin()` and link to time-domain behavior
 - [ ] Disturbance test (extra outflow valve opening)
 - [ ] Add pump gain, saturation, and optionally pump lag
 - [ ] Optional: asymmetric valves, sensor noise
@@ -164,7 +185,8 @@ Findings:
 |---|---|
 | 2026-10-09 | Built and validated single-tank and two-tank nonlinear Simulink models. Parameterized with `params.m`. Linearized at h2* = 0.2 m. |
 | 2026-10-14 | Verified linearization (poles, DC gain). Set design spec. Designed P (35% steady-state error) and PI (0% error, 6% overshoot, 636 s settling). Speed limited by plant poles; PID next. |
-
+| 2026-10-14 | PID designed by pole-zero cancellation: 0% overshoot, 275 s settling, 0 steady-state error. Flagged pump saturation risk for realistic steps. |
+| 2026-10-14 | PID margins: PM 77.7 deg, GM infinite. Gain sweep shows overshoot growing as phase margin shrinks (`stability.m`). |
 ## How to run
 
 1. Open MATLAB in `01-simulink-modeling/`.
