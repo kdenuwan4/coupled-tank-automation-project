@@ -30,3 +30,7 @@ u_ss = Qin_ss / k_pump;              % pump voltage needed for that flow
 
 disp([h1_ss Q1_ss u_ss])
 
+% PID controller (designed in design_controller.m)
+z = 0.007428;  N = 0.05;  K = 0.03;
+C_num = K*N*[1 2*z z^2];       % numerator of the PID transfer function
+C_den = [1 N 0];               % denominator: s*(s+N)
