@@ -11,3 +11,4 @@ Dated history of the project, newest entries at the bottom. The README describes
 | 2026-10-14 | PID closed on nonlinear model: 2 cm setpoint step settles in about 275 s, matching linear prediction. |
 | 2026-10-14 | 5 cm step on nonlinear model: pump saturation and integrator windup cause overshoot and slower settling. Anti-windup needed. |
 | 2026-10-18 | Measured 5 cm step on nonlinear model: 6% overshoot, about 650 s settling (vs 275 s linear prediction). Created GitHub issues for anti-windup, disturbance test, pump gain block and extensions. |
+| 2026-10-18 | Replaced Transfer Fcn with PID block (clamping anti-windup, output limits). 5 cm step: 375 s settling, no overshoot (was 650 s, 6%). Re-measured 2 cm step with 2% band: 246 s. |

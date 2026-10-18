@@ -167,6 +167,13 @@ The PID is closed around `TankModel.slx` with the operating-flow offset `Qin_ss`
 
 The linear design therefore holds only for steps small enough to stay inside the pump limit. For larger steps an anti-windup scheme is required.
 
+| Setpoint step | Behavior |
+|---|---|
+| 0.20 to 0.22 m (2 cm) | Settles in about 246 s after the step (2% band), close to the 275 s predicted by the linear design. The pump stays inside its limit. |
+| 0.20 to 0.25 m (5 cm) | The pump saturates. With clamping anti-windup, the response settles about 375 s after the step with no overshoot. Without anti-windup (plain Transfer Fcn controller) the same step took about 650 s and overshot by 6%. |
+
+Controller: Simulink PID block (parallel form, filtered derivative, output limits matching the pump range, clamping anti-windup). All specs are met for both step sizes.
+
 ## Assumptions and known limitations
 
 - The plant input is pump **flow** (m^3/s). A voltage-to-flow pump gain is not in the model yet and is needed for the PLC phase.
@@ -174,7 +181,7 @@ The linear design therefore holds only for steps small enough to stay inside the
 - Identical tanks and valves. Asymmetric valves would split the two poles.
 - Physical level limits (empty and overflow) are not enforced in the integrators.
 - The PID relies on pole-zero cancellation at the linearization point. Robustness to operating-point drift and disturbance rejection (for example an extra outflow valve opening) are not evaluated yet.
-- No anti-windup in the controller.
+
 
 ## Tools
 
