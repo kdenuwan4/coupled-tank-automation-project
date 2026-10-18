@@ -24,3 +24,5 @@ T_PID = feedback(C_PID*P, 1);
 
 step(T_P, T_PI, T_PID); legend('P','PI','PID'); grid on
 stepinfo(T_PID), dcgain(T_PID)
+
+

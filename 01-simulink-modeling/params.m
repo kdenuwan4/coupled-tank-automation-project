@@ -49,3 +49,5 @@ disp(['Ki   = ', num2str(Ki)]);
 disp(['Kp   = ', num2str(Kp)]);
 disp(['Kd   = ', num2str(Kd)]);
 disp(['Nf   = ', num2str(Nf), ' rad/s']);
+
+kd_extra = 0.25*k2;        % extra valve: 25% of valve 2's outflow coefficient

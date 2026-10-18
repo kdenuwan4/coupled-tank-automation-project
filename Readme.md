@@ -174,13 +174,15 @@ The linear design therefore holds only for steps small enough to stay inside the
 
 Controller: Simulink PID block (parallel form, filtered derivative, output limits matching the pump range, clamping anti-windup). All specs are met for both step sizes.
 
+**Disturbance rejection.** An extra outflow valve on Tank 2 (25% of valve 2's coefficient, `kd_extra` in `params.m`) opens at t = 600 s while the setpoint is held at 0.2 m. Tank 2 dips by 31 mm (to 0.1687 m) and returns to the 2% band after about 496 s. The integrator raises the pump flow to 7.43e-5 m^3/s, matching the hand-calculated sum of both outflows, and Tank 1 settles near 0.31 m (calculated 0.3125 m; a linearized model would predict 0.300 m). The pump does not saturate. Recovery is slower than setpoint tracking (about 246 s) because the disturbance enters downstream of the pole-zero cancellation, so the plant's slow pole (135 s time constant) appears in the response. The plant poles moved to about -0.0059 and -0.0093 at the new operating point, yet the controller still recovered, consistent with the 77.7 deg phase margin.
+
 ## Assumptions and known limitations
 
 - The plant input is pump **flow** (m^3/s). A voltage-to-flow pump gain is not in the model yet and is needed for the PLC phase.
 - Ideal actuator (no pump lag) and ideal level sensor (no noise or delay).
 - Identical tanks and valves. Asymmetric valves would split the two poles.
 - Physical level limits (empty and overflow) are not enforced in the integrators.
-- The PID relies on pole-zero cancellation at the linearization point. Robustness to operating-point drift and disturbance rejection (for example an extra outflow valve opening) are not evaluated yet.
+- Disturbance recovery (about 496 s) is slower than setpoint tracking because the PID cancels the plant's slow poles, which a disturbance at Tank 2 bypasses. A design that does not rely on cancellation would recover faster.
 
 
 ## Tools
